@@ -22,8 +22,13 @@ def clustering_model(distance_matrix: np.ndarray, scale=True):
 	if scale:
 		distance_matrix = MinMaxScaler().fit_transform(distance_matrix)
 
-	alpha = np.median(distance_matrix)
-	clusterer = hdbscan.HDBSCAN(metric='precomputed', min_samples=1, alpha=alpha)
+	min_cluster_size = int(distance_matrix.shape[0]/10)
+	if min_cluster_size < 2:
+		min_cluster_size = 2
+
+	clusterer = hdbscan.HDBSCAN(
+					metric='precomputed', 
+					min_cluster_size=min_cluster_size)
 	output = clusterer.fit(distance_matrix)
 	num_lanes = clusterer.labels_.max()
 	if num_lanes <= 0: #incase of no prediction
@@ -107,7 +112,7 @@ if __name__ == '__main__':
 
 	if len(sys.argv)!=4:
 		print('usage: python main.py <vehicles_filepath> <roads_filepath> <out_filepath>')
-	
+
 	vehicles_filepath = sys.argv[1]
 	roads_filepath = sys.argv[2]
 	out_filepath = sys.argv[3]
